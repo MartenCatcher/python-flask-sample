@@ -1,0 +1,23 @@
+pipelines:
+  default:
+    - step:
+        name: Test
+        image: python:3.7.5
+        caches:
+          - pip
+        script:
+          - python3 -V
+          - pip -V
+          - pip install -r requirements.txt
+          - python3 -m unittest discover . -v
+    - step:
+        name: Build
+        script:
+          - export TAG=build-$BITBUCKET_BUILD_NUMBER
+          - export IMAGE=martencatcher/python-flask-sample
+          - docker login -u $DOCKER_USERNAME -p $DOCKER_PASSWORD
+          - docker build -t $IMAGE:$TAG -t $IMAGE:latest .
+          - docker push $IMAGE:$TAG
+
+options:
+  docker: true
